@@ -1,0 +1,247 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local Window = Rayfield:CreateWindow({
+   Name = "Xyra Hub",
+   Icon = 0, 
+   LoadingTitle = "Xyra Hub",
+   LoadingSubtitle = "by Stiziey",
+   Theme = "DarkBlue", 
+
+   DisableRayfieldPrompts = false,
+   DisableBuildWarnings = false, 
+
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = nil, 
+      FileName = "Xyra Hub"
+   },
+
+   Discord = {
+      Enabled = true,
+      Invite = "vkM8SxnPyM", 
+      RememberJoins = false 
+   },
+
+   KeySystem = true, 
+   KeySettings = {
+      Title = "Xrya Key System",
+      Subtitle = "Please enter key.",
+      Note = "You can find the key in the Discord server.",
+      FileName = "Key", 
+      SaveKey = true, 
+      GrabKeyFromSite = true, 
+      Key = { "https://pastebin.com/raw/Jxqb7tRq" } 
+   }
+})
+
+local Tab = Window:CreateTab("Main", 4483362458)
+local Section = Tab:CreateSection("Features")
+
+Rayfield:Notify({
+   Title = "Execution Successful!",
+   Content = "Thank you for using Xyra Hub. If you experience any errors please contact Stiziey#0",
+   Duration = 6.5,
+   Image = 4483362458,
+})
+
+-- Hitbox Expander Toggle
+local ToggleHitbox = Tab:CreateToggle({
+   Name = "Hitbox Expander",
+   CurrentValue = false,
+   Flag = "Toggle1",
+   Callback = function(Value)
+      _G.HeadSize = 10
+      _G.Disabled = true
+
+      game:GetService('RunService').RenderStepped:connect(function()
+         if _G.Disabled then
+            for i, v in next, game:GetService('Players'):GetPlayers() do
+               if v.Name ~= game:GetService('Players').LocalPlayer.Name and v.Team ~= game:GetService('Players').LocalPlayer.Team then
+                  pcall(function()
+                     local hitboxColor = _G.HitboxColor or Color3.fromRGB(255, 255, 255)
+                     v.Character.HumanoidRootPart.Size = Vector3.new(_G.HeadSize, _G.HeadSize, _G.HeadSize)
+                     v.Character.HumanoidRootPart.Transparency = 0.7
+                     v.Character.HumanoidRootPart.BrickColor = BrickColor.new(hitboxColor)
+                     v.Character.HumanoidRootPart.Material = "Neon"
+                     v.Character.HumanoidRootPart.CanCollide = false
+                  end)
+               end
+            end
+         end
+      end)
+   end,
+})
+
+-- Hitbox Color Picker
+local ColorPicker = Tab:CreateColorPicker({
+    Name = "Hitbox Color",
+    Color = Color3.fromRGB(255, 255, 255), -- Default color
+    Flag = "ColorPicker1",
+    Callback = function(Value)
+        -- Store the selected color in _G.HitboxColor
+        _G.HitboxColor = Value
+    end
+})
+
+-- Hitbox Size Slider
+local Slider = Tab:CreateSlider({
+   Name = "Hitbox Size",
+   Range = {0, 20},  -- Range from 0 to 20
+   Increment = 1,    -- Control how smoothly it changes
+   Suffix = "Studs",
+   CurrentValue = 10,
+   Flag = "Slider1",
+   Callback = function(Value)
+      _G.HeadSize = Value
+   end,
+})
+
+-- Aimbot Toggle
+local ToggleAimbot = Tab:CreateToggle({
+    Name = "Aimbot",
+    CurrentValue = false,
+    Flag = "ToggleAimbot",
+    Callback = function(Value)
+        _G.AimbotEnabled = Value
+        lockedTarget = nil
+        lockedTargetPlayer = nil
+
+        -- Reapply head dots when aimbot is toggled on
+        if Value then
+            for _, player in pairs(game:GetService("Players"):GetPlayers()) do
+                if player.Team ~= game:GetService("Players").LocalPlayer.Team then
+                    createHeadDot(player)
+                end
+            end
+        else
+            -- Remove all head dots when aimbot is toggled off
+            for _, player in pairs(game:GetService("Players"):GetPlayers()) do
+                if player.Team ~= game:GetService("Players").LocalPlayer.Team then
+                    removeHeadDot(player)
+                end
+            end
+        end
+    end,
+})
+
+-- Visible Check Toggle
+local ToggleVisibleCheck = Tab:CreateToggle({
+    Name = "Visible Check",
+    CurrentValue = false,
+    Flag = "ToggleVisibleCheck",
+    Callback = function(Value)
+        _G.VisibleCheck = Value
+    end,
+})
+
+-- Function to create head dots for all enemies
+function createHeadDot(player)
+    if player.Character and player.Character:FindFirstChild("Head") then
+        local existingDot = player.Character:FindFirstChild("HeadDot")
+        if existingDot then
+            return -- Head dot already exists, no need to create a new one
+        end
+
+        local dot = Instance.new("BillboardGui")
+        dot.Name = "HeadDot"
+        dot.Adornee = player.Character.Head
+        dot.Size = UDim2.new(0, 6, 0, 6)  -- Smaller dot size
+        dot.AlwaysOnTop = true
+        dot.Parent = player.Character.Head
+        dot.StudsOffset = Vector3.new(0, 2, 0)  -- Position dot above the head
+
+        local dotCircle = Instance.new("Frame")
+        dotCircle.Size = UDim2.new(1, 0, 1, 0)
+        dotCircle.Position = UDim2.new(0, 5, 0, 5)
+        dotCircle.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        dotCircle.BackgroundTransparency = 0.5
+        dotCircle.BorderSizePixel = 0
+        dotCircle.Parent = dot
+    end
+end
+
+-- Function to remove head dots for enemies
+function removeHeadDot(player)
+    if player.Character and player.Character:FindFirstChild("Head") then
+        local dot = player.Character:FindFirstChild("HeadDot")
+        if dot then
+            dot:Destroy()
+        end
+    end
+end
+
+-- Player respawn or new character detection
+game:GetService("Players").PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function(character)
+        if player.Team ~= game:GetService("Players").LocalPlayer.Team then
+            -- Create a head dot when a new player spawns
+            createHeadDot(player)
+        end
+    end)
+end)
+
+game:GetService("Players").PlayerRemoving:Connect(function(player)
+    -- Remove the head dot when the player leaves
+    removeHeadDot(player)
+end)
+
+-- Ensure head dots exist for all living enemies at all times
+game:GetService("RunService").Heartbeat:Connect(function()
+    for _, player in pairs(game:GetService("Players"):GetPlayers()) do
+        if player.Team ~= game:GetService("Players").LocalPlayer.Team and player.Character and player.Character:FindFirstChild("Humanoid") then
+            if player.Character.Humanoid.Health > 0 then
+                createHeadDot(player)  -- Ensure head dot is there if player is alive
+            else
+                removeHeadDot(player)  -- Remove the head dot if the player is dead
+            end
+        end
+    end
+end)
+
+-- Aimbot Logic for Targeting
+game:GetService("RunService").RenderStepped:Connect(function()
+    if _G.AimbotEnabled and game:GetService("UserInputService"):IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
+        local closestEnemy = nil
+        local shortestDistance = math.huge
+        local closestEnemyScreenPos = nil
+
+        for _, player in pairs(game:GetService("Players"):GetPlayers()) do
+            if player.Name ~= game.Players.LocalPlayer.Name and player.Team ~= game.Players.LocalPlayer.Team and
+               player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0 then
+
+                local enemyHead = player.Character:FindFirstChild("Head")
+                if enemyHead then
+                    local screenPoint = workspace.CurrentCamera:WorldToScreenPoint(enemyHead.Position)
+                    local mousePos = game:GetService("UserInputService"):GetMouseLocation()
+
+                    -- Calculate the distance between the enemy and the mouse
+                    local distance = (Vector2.new(screenPoint.X, screenPoint.Y) - mousePos).Magnitude
+
+                    -- Skip the enemy if it's behind the player or too far
+                    if screenPoint.Z > 0 then
+                        if distance < shortestDistance then
+                            if _G.VisibleCheck then
+                                local ray = Ray.new(workspace.CurrentCamera.CFrame.Position, (enemyHead.Position - workspace.CurrentCamera.CFrame.Position).Unit * 1000)
+                                local hit, _ = workspace:FindPartOnRay(ray, game.Players.LocalPlayer.Character)
+                                if hit and hit:IsDescendantOf(player.Character) then
+                                    closestEnemy = player
+                                    shortestDistance = distance
+                                    closestEnemyScreenPos = screenPoint
+                                end
+                            else
+                                closestEnemy = player
+                                shortestDistance = distance
+                                closestEnemyScreenPos = screenPoint
+                            end
+                        end
+                    end
+                end
+            end
+        end
+
+        -- Lock onto the closest enemy and move the mouse
+        if closestEnemy then
+            local mousePos = game:GetService("UserInputService"):GetMouseLocation()
+            game:GetService("UserInputService"):SetMouseLocation(Vector2.new(closestEnemyScreenPos.X, closestEnemyScreenPos.Y))
+        end
+    end
+end)
