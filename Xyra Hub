@@ -133,6 +133,16 @@ local ToggleVisibleCheck = Tab:CreateToggle({
     end,
 })
 
+-- Create a Head Dot Color Picker
+local HeadDotColorPicker = Tab:CreateColorPicker({
+    Name = "Head Dot Color",
+    Color = Color3.fromRGB(255, 0, 0), -- Default color (Red)
+    Flag = "HeadDotColorPicker",
+    Callback = function(Value)
+        _G.HeadDotColor = Value
+    end
+})
+
 -- Function to create head dots for all enemies
 function createHeadDot(player)
     if player.Character and player.Character:FindFirstChild("Head") then
@@ -152,7 +162,7 @@ function createHeadDot(player)
         local dotCircle = Instance.new("Frame")
         dotCircle.Size = UDim2.new(1, 0, 1, 0)
         dotCircle.Position = UDim2.new(0, 5, 0, 5)
-        dotCircle.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        dotCircle.BackgroundColor3 = _G.HeadDotColor or Color3.fromRGB(255, 0, 0)  -- Use the selected color for the head dot
         dotCircle.BackgroundTransparency = 0.5
         dotCircle.BorderSizePixel = 0
         dotCircle.Parent = dot
