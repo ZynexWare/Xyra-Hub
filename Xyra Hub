@@ -202,7 +202,6 @@ game:GetService("RunService").RenderStepped:Connect(function()
     if _G.AimbotEnabled and game:GetService("UserInputService"):IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
         local closestEnemy = nil
         local shortestDistance = math.huge
-        local closestEnemyScreenPos = nil
 
         for _, player in pairs(game:GetService("Players"):GetPlayers()) do
             if player.Name ~= game.Players.LocalPlayer.Name and player.Team ~= game.Players.LocalPlayer.Team and
@@ -225,12 +224,10 @@ game:GetService("RunService").RenderStepped:Connect(function()
                                 if hit and hit:IsDescendantOf(player.Character) then
                                     closestEnemy = player
                                     shortestDistance = distance
-                                    closestEnemyScreenPos = screenPoint
                                 end
                             else
                                 closestEnemy = player
                                 shortestDistance = distance
-                                closestEnemyScreenPos = screenPoint
                             end
                         end
                     end
@@ -238,10 +235,14 @@ game:GetService("RunService").RenderStepped:Connect(function()
             end
         end
 
-        -- Lock onto the closest enemy and move the mouse
+        -- Lock onto the closest enemy and adjust the camera's CFrame to aim at them
         if closestEnemy then
-            local mousePos = game:GetService("UserInputService"):GetMouseLocation()
-            game:GetService("UserInputService"):SetMouseLocation(Vector2.new(closestEnemyScreenPos.X, closestEnemyScreenPos.Y))
+            local enemyHead = closestEnemy.Character:FindFirstChild("Head")
+            if enemyHead then
+                local camera = workspace.CurrentCamera
+                local direction = (enemyHead.Position - camera.CFrame.Position).unit
+                camera.CFrame = CFrame.new(camera.CFrame.Position, enemyHead.Position)
+            end
         end
     end
 end)
